@@ -55,7 +55,9 @@ target_include_directories(TarefaPWM PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(TarefaPWM 
-        
+        pico_stdlib
+        hardware_pwm
+        hardware_gpio
         )
 
 pico_add_extra_outputs(TarefaPWM)
