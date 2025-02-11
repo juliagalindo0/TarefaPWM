@@ -27,3 +27,15 @@ Definição dos pulsos PWM para posicionar o servo nos ângulos desejados:
 ⏳ 2400µs → 180°
 
 Movimentação suave do servo entre 0° e 180° com incremento de 5µs e atraso de 10ms.
+
+## 📹Vídeo 
+
+Após o experimento com a Ferramenta Educacional BitDogLab, foi observado que:
+
+A intensidade da cor azul do LED RGB varia suavemente conforme o servo se move.
+
+Quanto maior o ângulo do servo, mais forte o brilho azul.
+
+O LED apaga completamente quando o servo está em 0° e acende no máximo em 180°
+
+Link para o vídeo: [https://drive.google.com/file/d/1wdQQ01lokM3fChnW6TqUhbsESuxWQx0P/view?usp=sharing](https://drive.google.com/file/d/1wdQQ01lokM3fChnW6TqUhbsESuxWQx0P/view?usp=sharing)
