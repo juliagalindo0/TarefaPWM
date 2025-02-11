@@ -3,8 +3,8 @@
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
 
-#define SERVO_PIN 22      // Pino de controle PWM
-#define LED_PIN 12        // Pino do LED RGB
+#define SERVO_PIN 22      // Pino de controle PWM do servo
+#define LED_PIN 12        // Pino do canal azul do LED RGB
 #define PWM_FREQUENCY 50  // Frequência do PWM em Hz
 #define CLOCK_DIV 125.0f  // Divisor de clock para 50Hz
 #define TOP_VALUE 40000   // Valor máximo do contador PWM
@@ -27,31 +27,34 @@ void definir_pulso_pwm(uint pino, uint32_t pulso) {
     pwm_set_gpio_level(pino, pulso);
 }
 
-void configurar_led(uint pino) {
-    gpio_init(pino);
-    gpio_set_dir(pino, GPIO_OUT);
+void configurar_led_pwm(uint pino) {
+    gpio_set_function(pino, GPIO_FUNC_PWM);
+    uint slice = pwm_gpio_to_slice_num(pino);
+    pwm_set_clkdiv(slice, CLOCK_DIV);
+    pwm_set_wrap(slice, TOP_VALUE);
+    pwm_set_enabled(slice, true);
 }
 
-void definir_estado_led(uint pino, bool estado) {
-    gpio_put(pino, estado);
+void definir_intensidade_led(uint pino, uint32_t intensidade) {
+    pwm_set_gpio_level(pino, intensidade);
 }
 
 int main() {
     stdio_init_all();
     configurar_pwm(SERVO_PIN);
-    configurar_led(LED_PIN);
+    configurar_led_pwm(LED_PIN);
 
     // Posicionamento inicial do servo
     definir_pulso_pwm(SERVO_PIN, SERVO_MAX);
-    definir_estado_led(LED_PIN, 1); // LED aceso
+    definir_intensidade_led(LED_PIN, TOP_VALUE); // Máxima intensidade de azul
     sleep_ms(5000);
 
     definir_pulso_pwm(SERVO_PIN, SERVO_MID);
-    definir_estado_led(LED_PIN, 0); // LED apagado
+    definir_intensidade_led(LED_PIN, TOP_VALUE / 2); // Intensidade média
     sleep_ms(5000);
 
     definir_pulso_pwm(SERVO_PIN, SERVO_MIN);
-    definir_estado_led(LED_PIN, 1); // LED aceso novamente
+    definir_intensidade_led(LED_PIN, 0); // Azul apagado
     sleep_ms(5000);
 
     uint32_t angulo = SERVO_MIN;
@@ -59,16 +62,19 @@ int main() {
 
     while (true) {
         definir_pulso_pwm(SERVO_PIN, angulo);
+
+        // Ajusta a intensidade do azul conforme o ângulo do servo
+        uint32_t intensidade_azul = ((angulo - SERVO_MIN) * TOP_VALUE) / (SERVO_MAX - SERVO_MIN);
+        definir_intensidade_led(LED_PIN, intensidade_azul);
+
         sleep_ms(STEP_DELAY);
 
         // Alterna entre mover o servo para frente e para trás
         if (subindo) {
             angulo += STEP_SIZE;
-            definir_estado_led(LED_PIN, 1); // LED aceso enquanto sobe
             if (angulo >= SERVO_MAX) subindo = false;
         } else {
             angulo -= STEP_SIZE;
-            definir_estado_led(LED_PIN, 0); // LED apagado enquanto desce
             if (angulo <= SERVO_MIN) subindo = true;
         }
     }
